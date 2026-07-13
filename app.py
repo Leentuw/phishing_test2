@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 
 app = Flask(__name__)
 # مفتاح سري لإدارة الجلسات
 app.secret_key = 'cybersecurity_drill_secret_key'
 ALLOWED_DOMAIN = "@ud.sa"
+
 # تهيئة قاعدة البيانات لحفظ الإيميلات التي وقعت في الفخ
 def init_db():
     conn = sqlite3.connect('database.db')
@@ -23,7 +24,7 @@ def init_db():
 
 init_db()
 
-# 1. المسار الرئيسي (/) - تم تعديله ليجبر المستخدم على صفحة تسجيل الدخول أولاً
+# 1. المسار الرئيسي (/)
 @app.route('/')
 def index():
     # إذا لم يكتب المستخدم إيميله بعد، يتم تحويله إجبارياً لصفحة تسجيل الدخول
@@ -37,20 +38,16 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user_email = request.form.get('email')
+        user_email = request.form.get('email', '').strip()
         user_ip = request.remote_addr
         
-        #1. التحقق من الدوماين المخصص
-        if not email.endswith(ALLOWED.DOMAIN):
-            # اذا كان الدوماين غير مطابق ترفض الدخول ونظهر رساله تنبيه
+        # 1. التحقق من الدومين المخصص
+        if not user_email.endswith(ALLOWED_DOMAIN):
+            # إذا كان الدومين غير مطابق نرفض الدخول ونظهر رسالة تنبيه
             flash(f"عذراً، التسجيل متاح فقط باستخدام إيميل ينتهي بـ {ALLOWED_DOMAIN}")
             return render_template('login.html')
 
-        return "تم تسجيل الدخول بنجاح"
-
-    return render_template('login.html')
-        
-        # حفظ الإيميل والـ IP مباشرة بمجرد الضغط على زر "التالي"
+        # حفظ الإيميل والـ IP مباشرة بعد التحقق
         conn = sqlite3.connect('database.db')
         cursor = conn.cursor()
         cursor.execute('''
@@ -60,18 +57,19 @@ def login():
         conn.commit()
         conn.close()
         
-        # وضع علامة في المتصفح تفيد بأن المستخدم أكمل التسجيل لكي تفتح له صفحة التنبيه
+        # وضع علامة في المتصفح تفيد بأن المستخدم أكمل التسجيل
         session['phished_user'] = user_email
         
         # توجيه المستخدم فوراً إلى صفحة الفخ الرئيسية
         return redirect(url_for('index'))
         
     return render_template('login.html')
+
 @app.route('/dashboard')
 def dashboard():
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
-    # جلب البيانات بناءً على أسماء الأعمدة والجدول في كودك
+    # جلب البيانات
     cursor.execute('SELECT email, agreed_status, ip_address FROM agreements')
     rows = cursor.fetchall()
     conn.close()
