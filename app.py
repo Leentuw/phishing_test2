@@ -45,8 +45,13 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user_email = request.form.get('email', '').strip()
-        user_ip = request.remote_addr
+        email = request.form['email']
+        session['user_email'] = email
+        return redirect(url_for('index'))
+     return render_template('login.html')
+
+        # user_email = request.form.get('email', '').strip()
+       # user_ip = request.remote_addr
         
         # 1. التحقق من الدومين المخصص
         if not user_email.endswith(ALLOWED_DOMAIN):
