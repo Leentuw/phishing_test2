@@ -48,7 +48,7 @@ def login():
         email = request.form['email']
         session['user_email'] = email
         return redirect(url_for('index'))
-     return render_template('login.html')
+        return render_template('login.html')
 
         # user_email = request.form.get('email', '').strip()
        # user_ip = request.remote_addr
