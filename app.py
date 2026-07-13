@@ -4,7 +4,7 @@ import sqlite3
 app = Flask(__name__)
 # مفتاح سري لإدارة الجلسات
 app.secret_key = 'cybersecurity_drill_secret_key'
-
+ALLOWED_DOMAIN = "@ud.sa"
 # تهيئة قاعدة البيانات لحفظ الإيميلات التي وقعت في الفخ
 def init_db():
     conn = sqlite3.connect('database.db')
@@ -39,6 +39,16 @@ def login():
     if request.method == 'POST':
         user_email = request.form.get('email')
         user_ip = request.remote_addr
+        
+        #1. التحقق من الدوماين المخصص
+        if not email.endswith(ALLOWED.DOMAIN):
+            # اذا كان الدوماين غير مطابق ترفض الدخول ونظهر رساله تنبيه
+            flash(f"عذراً، التسجيل متاح فقط باستخدام إيميل ينتهي بـ {ALLOWED_DOMAIN}")
+            return render_template('login.html')
+
+        return "تم تسجيل الدخول بنجاح"
+
+    return render_template('login.html')
         
         # حفظ الإيميل والـ IP مباشرة بمجرد الضغط على زر "التالي"
         conn = sqlite3.connect('database.db')
