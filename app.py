@@ -57,6 +57,17 @@ def login():
         return redirect(url_for('index'))
         
     return render_template('login.html')
-
+@app.route('/dashboard')
+def dashboard():
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    # جلب البيانات بناءً على أسماء الأعمدة والجدول في كودك
+    cursor.execute('SELECT email, agreed_status, ip_address FROM agreements')
+    rows = cursor.fetchall()
+    conn.close()
+    
+    # إرسال البيانات لملف الـ HTML ليعرضها في جدول
+    return render_template('dashboard.html', rows=rows)
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
