@@ -24,6 +24,13 @@ def init_db():
 
 init_db()
 
+@app.before_request
+def require_login():
+    # استثناء صفحة تسجيل الدخول حتى لا يدخل في حلقة لا نهائية
+    allowed_routes = ['login', 'static'] 
+    if request.endpoint not in allowed_routes and 'user_email' not in session:
+        return redirect(url_for('login'))
+        
 # 1. المسار الرئيسي (/)
 @app.route('/')
 def index():
