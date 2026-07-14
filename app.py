@@ -4,7 +4,7 @@ import sqlite3
 app = Flask(__name__)
 # مفتاح سري لإدارة الجلسات
 app.secret_key = 'cybersecurity_drill_secret_key'
-ALLOWED_DOMAIN = "@ud.sa"
+
 
 # تهيئة قاعدة البيانات لحفظ الإيميلات التي وقعت في الفخ
 def init_db():
